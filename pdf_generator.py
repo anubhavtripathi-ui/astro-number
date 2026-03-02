@@ -1,12 +1,10 @@
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
-from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
 from reportlab.lib.pagesizes import A4
-from reportlab.platypus import Table, TableStyle
 from io import BytesIO
 
-def generate_pdf(name, dob, mulank, bhagyank, personal_year, missing, count, personality):
+def generate_pdf(name, dob, mulank, bhagyank, personal_year, missing, count, personality, enemy):
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4)
     elements = []
@@ -25,6 +23,7 @@ def generate_pdf(name, dob, mulank, bhagyank, personal_year, missing, count, per
     elements.append(Paragraph(f"Mulank: {mulank}", normal_style))
     elements.append(Paragraph(f"Bhagyank: {bhagyank}", normal_style))
     elements.append(Paragraph(f"Personal Year: {personal_year}", normal_style))
+    elements.append(Paragraph(f"Enemy Number: {enemy}", normal_style))
     elements.append(Spacer(1, 0.2 * inch))
 
     elements.append(Paragraph(f"Missing Numbers: {', '.join(map(str, missing))}", normal_style))
