@@ -1,51 +1,46 @@
 import streamlit as st
-from datetime import date
+from datetime import datetime, date
 from personality_logic import get_personality_and_enemy
 from pdf_generator import generate_pdf
 from collections import Counter
 
 st.set_page_config(page_title="Astro-Number", layout="centered")
 
-# ---------- CLEAN DARK THEME ----------
+# Remove default padding
 st.markdown("""
 <style>
+header {visibility: hidden;}
+footer {visibility: hidden;}
 .stApp {
-    background-color: #0f172a;
+    background-color: #0b1120;
     color: white;
 }
-
 .block-container {
     padding-top: 1rem;
 }
-
-h1, h2, h3 {
-    color: #38bdf8;
+h1 {
+    text-align: center;
 }
-
-.grid-container {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    max-width: 400px;
+div.stButton > button {
+    background-color: #2563eb;
+    color: white;
+    border-radius: 8px;
+    height: 45px;
+    width: 100%;
+    font-weight: bold;
 }
-
-.grid-item {
-    border: 1px solid #334155;
-    height: 80px;
+div.stButton > button:hover {
+    background-color: #1d4ed8;
+}
+.grid-box {
+    height:70px;
     display:flex;
     align-items:center;
     justify-content:center;
-    font-size:22px;
-    font-weight:bold;
+    border:1px solid #334155;
     background-color:#1e293b;
-}
-
-.highlight {
-    background-color:#0ea5e9;
-}
-
-.missing {
-    background-color:#7c3aed;
+    font-weight:bold;
+    font-size:20px;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -54,9 +49,8 @@ st.title("ASTRO-NUMBER")
 st.caption("Your Personal Numerology Snapshot")
 
 name = st.text_input("Enter Your Name")
-dob = st.date_input("Enter Your Date of Birth", min_value=date(1900, 1, 1))
 
-st.caption(f"Selected DOB (DD-MM-YYYY): {dob.strftime('%d-%m-%Y')}")
+dob_input = st.text_input("Enter DOB (DD-MM-YYYY)")
 
 def reduce_to_single(num):
     while num > 9:
@@ -64,17 +58,19 @@ def reduce_to_single(num):
     return num
 
 if st.button("Generate Report"):
-    if not name:
-        st.warning("Please enter your name.")
-    else:
 
-        # --- STRICT DOB STRING ---
+    if not name or not dob_input:
+        st.warning("Please enter all fields.")
+    else:
+        try:
+            dob = datetime.strptime(dob_input, "%d-%m-%Y")
+        except:
+            st.error("DOB format must be DD-MM-YYYY")
+            st.stop()
+
         dob_str = dob.strftime("%d%m%Y")
 
-        day = dob.day
-
-        # Core numbers
-        mulank = reduce_to_single(day)
+        mulank = reduce_to_single(dob.day)
         bhagyank = reduce_to_single(sum(int(d) for d in dob_str))
 
         current_year = date.today().year
@@ -82,7 +78,6 @@ if st.button("Generate Report"):
             sum(int(d) for d in dob.strftime("%d%m") + str(current_year))
         )
 
-        # --- Correct Lo Shu Count ---
         digits = [int(d) for d in dob_str if d != "0"]
         count = Counter(digits)
         missing = [n for n in range(1,10) if n not in count]
@@ -97,23 +92,22 @@ if st.button("Generate Report"):
 
         st.markdown("### Lo Shu Grid")
 
-        grid_layout = [4,9,2,3,5,7,8,1,6]
+        grid = [4,9,2,3,5,7,8,1,6]
 
-        st.markdown('<div class="grid-container">', unsafe_allow_html=True)
-
-        for num in grid_layout:
-            if num in count:
-                st.markdown(
-                    f'<div class="grid-item highlight">{num} ({count[num]})</div>',
-                    unsafe_allow_html=True
-                )
-            else:
-                st.markdown(
-                    f'<div class="grid-item missing">{num}</div>',
-                    unsafe_allow_html=True
-                )
-
-        st.markdown('</div>', unsafe_allow_html=True)
+        for i in range(0,9,3):
+            cols = st.columns(3)
+            for j in range(3):
+                num = grid[i+j]
+                if num in count:
+                    cols[j].markdown(
+                        f'<div class="grid-box">{num} ({count[num]})</div>',
+                        unsafe_allow_html=True
+                    )
+                else:
+                    cols[j].markdown(
+                        f'<div class="grid-box">{num}</div>',
+                        unsafe_allow_html=True
+                    )
 
         st.write(f"Missing Numbers: {', '.join(map(str, missing))}")
 
