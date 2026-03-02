@@ -6,54 +6,78 @@ from collections import Counter
 
 st.set_page_config(page_title="Astro-Number", layout="centered")
 
-# ---------- Custom CSS ----------
+# ---------- MODERN DARK UI CSS ----------
 st.markdown("""
 <style>
-.main {
-    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+.stApp {
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    color: white;
 }
+
 .block-container {
     padding-top: 2rem;
     padding-bottom: 2rem;
 }
-.card {
-    background-color: white;
-    padding: 25px;
-    border-radius: 15px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-    margin-bottom: 20px;
+
+.glass-card {
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(15px);
+    padding: 30px;
+    border-radius: 18px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    margin-bottom: 25px;
 }
+
 .title-text {
     text-align: center;
-    font-size: 34px;
-    font-weight: bold;
-    color: white;
+    font-size: 38px;
+    font-weight: 700;
+    background: linear-gradient(90deg, #00f5ff, #7b2ff7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
+
 .subtitle-text {
     text-align: center;
     font-size: 18px;
-    color: #dddddd;
+    color: #cccccc;
     margin-bottom: 30px;
 }
+
 .grid-box {
-    border: 2px solid #444;
     height: 75px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 22px;
     font-weight: bold;
-    border-radius: 8px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.stButton>button {
+    width: 100%;
+    background: linear-gradient(90deg,#00f5ff,#7b2ff7);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.stButton>button:hover {
+    transform: scale(1.05);
 }
 </style>
 """, unsafe_allow_html=True)
 
-# ---------- Header ----------
-st.markdown('<div class="title-text">🔢 Astro-Number</div>', unsafe_allow_html=True)
+# ---------- HEADER ----------
+st.markdown('<div class="title-text">ASTRO-NUMBER</div>', unsafe_allow_html=True)
 st.markdown('<div class="subtitle-text">Your Personal Numerology Snapshot</div>', unsafe_allow_html=True)
 
-# ---------- Input Card ----------
-st.markdown('<div class="card">', unsafe_allow_html=True)
+# ---------- INPUT SECTION ----------
+st.markdown('<div class="glass-card">', unsafe_allow_html=True)
 
 name = st.text_input("Enter Your Name")
 dob = st.date_input("Enter Your Date of Birth", min_value=date(1900, 1, 1))
@@ -87,8 +111,8 @@ if st.button("Generate Report"):
 
         personality, enemy = get_personality_and_enemy(mulank)
 
-        # ---------- Results Card ----------
-        st.markdown('<div class="card">', unsafe_allow_html=True)
+        # ---------- RESULTS ----------
+        st.markdown('<div class="glass-card">', unsafe_allow_html=True)
 
         st.markdown("### Core Numbers")
         col1, col2, col3 = st.columns(3)
@@ -111,25 +135,20 @@ if st.button("Generate Report"):
                 with cols[i]:
                     if num in count:
                         st.markdown(
-                            f'<div class="grid-box" style="background-color:#d4edda;">{num} ({count[num]})</div>',
+                            f'<div class="grid-box" style="background:rgba(0,255,150,0.15);">{num} ({count[num]})</div>',
                             unsafe_allow_html=True
                         )
                     else:
                         st.markdown(
-                            f'<div class="grid-box" style="background-color:#f8d7da;">{num}</div>',
+                            f'<div class="grid-box" style="background:rgba(255,0,100,0.15);">{num}</div>',
                             unsafe_allow_html=True
                         )
 
         st.markdown(f"**Missing Numbers:** {', '.join(map(str, missing))}")
 
         st.markdown("---")
-        st.markdown("### Strength Meter")
-        for num, freq in count.items():
-            st.write(f"{num} appears {freq} time(s)")
-
-        st.markdown("---")
         st.markdown("### Personality Insight")
-        st.success(personality)
+        st.info(personality)
 
         st.markdown("### Enemy Number")
         st.error(f"{enemy}")
@@ -154,4 +173,3 @@ if st.button("Generate Report"):
             file_name="Astro-Number_Report.pdf",
             mime="application/pdf"
         )
-
