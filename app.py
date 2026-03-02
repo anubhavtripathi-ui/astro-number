@@ -6,83 +6,57 @@ from collections import Counter
 
 st.set_page_config(page_title="Astro-Number", layout="centered")
 
-# ---------- MODERN DARK UI CSS ----------
+# ---------- CLEAN DARK THEME ----------
 st.markdown("""
 <style>
 .stApp {
-    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    background-color: #0f172a;
     color: white;
 }
 
 .block-container {
-    padding-top: 2rem;
-    padding-bottom: 2rem;
+    padding-top: 1rem;
 }
 
-.glass-card {
-    background: rgba(255,255,255,0.08);
-    backdrop-filter: blur(15px);
-    padding: 30px;
-    border-radius: 18px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-    margin-bottom: 25px;
+h1, h2, h3 {
+    color: #38bdf8;
 }
 
-.title-text {
-    text-align: center;
-    font-size: 38px;
-    font-weight: 700;
-    background: linear-gradient(90deg, #00f5ff, #7b2ff7);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    max-width: 400px;
 }
 
-.subtitle-text {
-    text-align: center;
-    font-size: 18px;
-    color: #cccccc;
-    margin-bottom: 30px;
+.grid-item {
+    border: 1px solid #334155;
+    height: 80px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:22px;
+    font-weight:bold;
+    background-color:#1e293b;
 }
 
-.grid-box {
-    height: 75px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 22px;
-    font-weight: bold;
-    border-radius: 10px;
-    border: 1px solid rgba(255,255,255,0.2);
+.highlight {
+    background-color:#0ea5e9;
 }
 
-.stButton>button {
-    width: 100%;
-    background: linear-gradient(90deg,#00f5ff,#7b2ff7);
-    color: white;
-    border: none;
-    padding: 12px;
-    border-radius: 10px;
-    font-weight: bold;
-    transition: 0.3s;
-}
-
-.stButton>button:hover {
-    transform: scale(1.05);
+.missing {
+    background-color:#7c3aed;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# ---------- HEADER ----------
-st.markdown('<div class="title-text">ASTRO-NUMBER</div>', unsafe_allow_html=True)
-st.markdown('<div class="subtitle-text">Your Personal Numerology Snapshot</div>', unsafe_allow_html=True)
-
-# ---------- INPUT SECTION ----------
-st.markdown('<div class="glass-card">', unsafe_allow_html=True)
+st.title("ASTRO-NUMBER")
+st.caption("Your Personal Numerology Snapshot")
 
 name = st.text_input("Enter Your Name")
 dob = st.date_input("Enter Your Date of Birth", min_value=date(1900, 1, 1))
 
-st.markdown('</div>', unsafe_allow_html=True)
+st.caption(f"Selected DOB (DD-MM-YYYY): {dob.strftime('%d-%m-%Y')}")
 
 def reduce_to_single(num):
     while num > 9:
@@ -93,26 +67,27 @@ if st.button("Generate Report"):
     if not name:
         st.warning("Please enter your name.")
     else:
-        day = dob.day
-        month = dob.month
-        year = dob.year
 
+        # --- STRICT DOB STRING ---
+        dob_str = dob.strftime("%d%m%Y")
+
+        day = dob.day
+
+        # Core numbers
         mulank = reduce_to_single(day)
-        total = sum(int(d) for d in f"{day}{month}{year}")
-        bhagyank = reduce_to_single(total)
+        bhagyank = reduce_to_single(sum(int(d) for d in dob_str))
 
         current_year = date.today().year
-        py_total = sum(int(d) for d in f"{day}{month}{current_year}")
-        personal_year = reduce_to_single(py_total)
+        personal_year = reduce_to_single(
+            sum(int(d) for d in dob.strftime("%d%m") + str(current_year))
+        )
 
-        digits = [int(d) for d in f"{day}{month}{year}" if d != "0"]
+        # --- Correct Lo Shu Count ---
+        digits = [int(d) for d in dob_str if d != "0"]
         count = Counter(digits)
-        missing = [num for num in range(1, 10) if num not in count]
+        missing = [n for n in range(1,10) if n not in count]
 
         personality, enemy = get_personality_and_enemy(mulank)
-
-        # ---------- RESULTS ----------
-        st.markdown('<div class="glass-card">', unsafe_allow_html=True)
 
         st.markdown("### Core Numbers")
         col1, col2, col3 = st.columns(3)
@@ -120,40 +95,33 @@ if st.button("Generate Report"):
         col2.metric("Bhagyank", bhagyank)
         col3.metric("Personal Year", personal_year)
 
-        st.markdown("---")
         st.markdown("### Lo Shu Grid")
 
-        grid_layout = [
-            [4, 9, 2],
-            [3, 5, 7],
-            [8, 1, 6]
-        ]
+        grid_layout = [4,9,2,3,5,7,8,1,6]
 
-        for row in grid_layout:
-            cols = st.columns(3)
-            for i, num in enumerate(row):
-                with cols[i]:
-                    if num in count:
-                        st.markdown(
-                            f'<div class="grid-box" style="background:rgba(0,255,150,0.15);">{num} ({count[num]})</div>',
-                            unsafe_allow_html=True
-                        )
-                    else:
-                        st.markdown(
-                            f'<div class="grid-box" style="background:rgba(255,0,100,0.15);">{num}</div>',
-                            unsafe_allow_html=True
-                        )
+        st.markdown('<div class="grid-container">', unsafe_allow_html=True)
 
-        st.markdown(f"**Missing Numbers:** {', '.join(map(str, missing))}")
+        for num in grid_layout:
+            if num in count:
+                st.markdown(
+                    f'<div class="grid-item highlight">{num} ({count[num]})</div>',
+                    unsafe_allow_html=True
+                )
+            else:
+                st.markdown(
+                    f'<div class="grid-item missing">{num}</div>',
+                    unsafe_allow_html=True
+                )
 
-        st.markdown("---")
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        st.write(f"Missing Numbers: {', '.join(map(str, missing))}")
+
         st.markdown("### Personality Insight")
         st.info(personality)
 
         st.markdown("### Enemy Number")
-        st.error(f"{enemy}")
-
-        st.markdown('</div>', unsafe_allow_html=True)
+        st.error(enemy)
 
         pdf = generate_pdf(
             name,
