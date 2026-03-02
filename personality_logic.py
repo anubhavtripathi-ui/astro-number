@@ -1,14 +1,15 @@
-def get_personality(mulank):
-    personality_dict = {
-        1: "Natural leader, ambitious, independent and confident.",
-        2: "Emotional, diplomatic, intuitive and cooperative.",
-        3: "Creative, expressive, optimistic and social.",
-        4: "Practical, disciplined, stable and hardworking.",
-        5: "Adventurous, dynamic, freedom-loving and adaptable.",
-        6: "Responsible, caring, family-oriented and balanced.",
-        7: "Analytical, spiritual, introspective and thoughtful.",
-        8: "Powerful, goal-driven, authoritative and determined.",
-        9: "Compassionate, humanitarian, generous and wise."
+def get_personality_and_enemy(mulank):
+    data = {
+        1: ("Natural leader, ambitious and independent.", 8),
+        2: ("Emotional, diplomatic and intuitive.", 7),
+        3: ("Creative, expressive and optimistic.", 6),
+        4: ("Practical, disciplined and hardworking.", 9),
+        5: ("Adventurous, dynamic and adaptable.", 2),
+        6: ("Responsible, caring and balanced.", 3),
+        7: ("Analytical, spiritual and thoughtful.", 2),
+        8: ("Powerful, goal-driven and authoritative.", 1),
+        9: ("Compassionate, humanitarian and wise.", 4),
     }
 
-    return personality_dict.get(mulank, "Personality data unavailable.")
+    personality, enemy = data.get(mulank, ("Data unavailable.", "N/A"))
+    return personality, enemy
